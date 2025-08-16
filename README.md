@@ -47,7 +47,7 @@ Student Management System
 6- Exit
 -----------------------------
 Enter your choice: 3
-Enter password to continue: 12790
+Enter password to continue: *****
 
 Enter Student ID to search (4 digits): 1330
 
