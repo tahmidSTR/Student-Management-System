@@ -49,11 +49,11 @@ Student Management System
 Enter your choice: 3
 Enter password to continue: 12790
 
-Enter Student ID to search (4 digits): 1234
+Enter Student ID to search (4 digits): 1330
 
-Student ID: 1234
-Student Name: John
-Father's Name: Clive
-Mother's Name: Ellie
-Date of Birth: 13/06/2001
+Student ID: 1330
+Student Name: Syed Tahmid Reza
+Father's Name: Syed Ahmmed Reza
+Mother's Name: Nasima Parvin
+Date of Birth: 19/03/2005
 ```
