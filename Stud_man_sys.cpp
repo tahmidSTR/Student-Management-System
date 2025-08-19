@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <limits>
 using namespace std;
 
 const string PASSWORD = "12790";
@@ -43,8 +44,17 @@ bool isValidDate(const string& date) {
     if (!stringToInt(date.substr(3, 2), month)) return false;
     if (!stringToInt(date.substr(6, 4), year)) return false;
 
-    if (day < 1 || day > 31) return false;
-    if (month < 1 || month > 12) return false;
+    // Check valid month/day
+    if (month < 1 || month > 12 || day < 1) return false;
+
+    // Days per month
+    int maxDays[] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+    if (month == 2) { // leap year check
+        bool leap = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+        if (leap) maxDays[1] = 29;
+    }
+    if (day > maxDays[month - 1]) return false;
+
     if (year < 1900 || year > 2100) return false;
 
     return true;
@@ -80,44 +90,50 @@ int main() {
         cout << "5- Delete Student Record\n";
         cout << "6- Exit\n";
         cout << "-----------------------------\n";
-        cout << "Enter your choice(Any integer number from 1-6): ";
-        cin >> choice;
+        cout << "Enter your choice (1-6): ";
+
+        if (!(cin >> choice)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input! Please enter a number between 1 and 6.\n\n";
+            continue;
+        }
         cin.ignore();
 
         switch (choice) {
-            case '1':
+            case 1:
                 obj.newStud();
                 break;
-            case '2':
+            case 2:
                 if (verifyPassword()) obj.viewStud();
                 else cout << "Incorrect password.\n";
                 break;
-            case '3':
+            case 3:
                 if (verifyPassword()) obj.searchStud();
                 else cout << "Incorrect password.\n";
                 break;
-            case '4':
+            case 4:
                 if (verifyPassword()) obj.editStud();
                 else cout << "Incorrect password.\n";
                 break;
-            case '5':
+            case 5:
                 if (verifyPassword()) obj.deleteStud();
                 else cout << "Incorrect password.\n";
                 break;
-            case '6':
+            case 6:
                 cout << "Exiting...\n";
                 break;
             default:
-                cout << "Invalid Choice!\n";
+                cout << "Invalid Choice! Enter a number between 1-6.\n";
         }
         cout << endl;
-    } while (choice != '6');
+    } while (choice != 6);
 
     return 0;
 }
 
 void temp::newStud() {
-    cout << "\nEnter Student ID (4 digits): ";
+    cout << "\nEnter Student ID (Last 4 digits): ";
     getline(cin, id);
     if (!isPositiveInteger(id)) {
         cout << "Error: Student ID must be exactly 4 positive digits.\n";
@@ -160,7 +176,7 @@ void temp::newStud() {
     cout << "Enter Date of Birth(DD/MM/YYYY): ";
     getline(cin, dob);
     if (!isValidDate(dob)) {
-        cout << "Error: Date of Birth must be in DD/MM/YYYY format and valid.\n";
+        cout << "Error: Date of Birth must be valid and in DD/MM/YYYY format.\n";
         return;
     }
 
@@ -250,6 +266,7 @@ void temp::editStud() {
     ofstream tempFile("temp.txt");
 
     bool found = false;
+
     while (getline(file, id, '*') &&
            getline(file, name, '*') &&
            getline(file, fname, '*') &&
@@ -260,40 +277,44 @@ void temp::editStud() {
             found = true;
             cout << "\nEditing record for ID: " << id << "\n";
 
-            cout << "Enter New Name: ";
-            getline(cin, name);
-            if (!isValidName(name)) {
-                cout << "Error: Name must contain only English letters and spaces.\n";
-                tempFile << id << "*" << name << "*" << fname << "*" << mname << "*" << dob << "\n";
-                continue;
-            }
+            string newName, newFname, newMname, newDob;
 
-            cout << "Enter New Father's Name: ";
-            getline(cin, fname);
-            if (!isValidName(fname)) {
-                cout << "Error: Father's Name must contain only English letters and spaces.\n";
-                tempFile << id << "*" << name << "*" << fname << "*" << mname << "*" << dob << "\n";
-                continue;
-            }
+            // Loop until valid Name
+            do {
+                cout << "Enter New Name: ";
+                getline(cin, newName);
+                if (!isValidName(newName))
+                    cout << "Error: Name must contain only English letters and spaces.\n";
+            } while (!isValidName(newName));
 
-            cout << "Enter New Mother's Name: ";
-            getline(cin, mname);
-            if (!isValidName(mname)) {
-                cout << "Error: Mother's Name must contain only English letters and spaces.\n";
-                tempFile << id << "*" << name << "*" << fname << "*" << mname << "*" << dob << "\n";
-                continue;
-            }
+            // Loop until valid Father's Name
+            do {
+                cout << "Enter New Father's Name: ";
+                getline(cin, newFname);
+                if (!isValidName(newFname))
+                    cout << "Error: Father's Name must contain only English letters and spaces.\n";
+            } while (!isValidName(newFname));
 
-            cout << "Enter New Date of Birth(DD/MM/YYYY): ";
-            getline(cin, dob);
-            if (!isValidDate(dob)) {
-                cout << "Error: Date of Birth must be in DD/MM/YYYY format and valid.\n";
-                tempFile << id << "*" << name << "*" << fname << "*" << mname << "*" << dob << "\n";
-                continue;
-            }
+            // Loop until valid Mother's Name
+            do {
+                cout << "Enter New Mother's Name: ";
+                getline(cin, newMname);
+                if (!isValidName(newMname))
+                    cout << "Error: Mother's Name must contain only English letters and spaces.\n";
+            } while (!isValidName(newMname));
+
+            // Loop until valid Date of Birth
+            do {
+                cout << "Enter New Date of Birth(DD/MM/YYYY): ";
+                getline(cin, newDob);
+                if (!isValidDate(newDob))
+                    cout << "Error: Date of Birth must be valid and in DD/MM/YYYY format.\n";
+            } while (!isValidDate(newDob));
+
+            tempFile << id << "*" << newName << "*" << newFname << "*" << newMname << "*" << newDob << "\n";
+        } else {
+            tempFile << id << "*" << name << "*" << fname << "*" << mname << "*" << dob << "\n";
         }
-
-        tempFile << id << "*" << name << "*" << fname << "*" << mname << "*" << dob << "\n";
     }
 
     file.close();
@@ -302,11 +323,12 @@ void temp::editStud() {
     remove("stuData.txt");
     rename("temp.txt", "stuData.txt");
 
-    if (found)
-        cout << "Record updated successfully.\n";
-    else
+    if (!found)
         cout << "Student ID not found.\n";
+    else
+        cout << "Record updated successfully.\n";
 }
+
 
 void temp::deleteStud() {
     string tempId;
@@ -345,4 +367,3 @@ void temp::deleteStud() {
     if (!found)
         cout << "Student ID not found.\n";
 }
-
